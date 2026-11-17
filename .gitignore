@@ -1,0 +1,13 @@
+# Build output
+dist/
+*.zip
+*.xpi
+
+# Tooling
+node_modules/
+.web-ext-build-cache
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp

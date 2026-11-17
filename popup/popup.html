@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Free Dictionary Lookup</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="fd-toolbar">
+      <img src="../icons/32.png" alt="" width="20" height="20" />
+      <span class="fd-toolbar-title">Free Dictionary</span>
+    </header>
+    <form id="fd-form" autocomplete="off">
+      <div class="fd-input-row">
+        <span id="fd-search-icon" class="fd-search-icon"></span>
+        <input id="fd-input" type="text" placeholder="Type a word…" maxlength="48"
+               aria-label="Word to look up" autofocus />
+        <button id="fd-go" type="submit" title="Look up">Go</button>
+      </div>
+    </form>
+    <div id="fd-results" class="fd-results"></div>
+    <script src="../shared.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,131 @@
+/* Free Dictionary Lookup — toolbar popup styles. */
+:root {
+  color-scheme: light dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  width: 340px;
+  margin: 0;
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #1f2430;
+  background: #f6f7fb;
+}
+
+.fd-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 6px;
+}
+
+.fd-toolbar-title { font-weight: 700; font-size: 14px; }
+
+.fd-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 14px 10px;
+  background: #ffffff;
+  border: 1px solid #d9dce8;
+  border-radius: 10px;
+  padding: 4px 4px 4px 10px;
+}
+
+.fd-input-row:focus-within { border-color: #4f46e5; }
+
+.fd-search-icon {
+  display: grid;
+  place-items: center;
+  color: #6b7280;
+  flex: none;
+}
+
+.fd-search-icon svg { width: 14px; height: 14px; }
+
+#fd-input {
+  flex: 1;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  min-width: 0;
+}
+
+#fd-go {
+  border: 0;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+#fd-go:hover { background: #4338ca; }
+
+.fd-results { padding: 0 14px 14px; }
+
+/* Renderer output (shared.js) */
+.fd-card {
+  background: #ffffff;
+  border: 1px solid #e3e6ee;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.fd-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; }
+.fd-word { font-weight: 700; font-size: 16px; overflow-wrap: anywhere; }
+.fd-phonetic { color: #6b7280; font-size: 12.5px; }
+.fd-audio {
+  margin-left: auto; flex: none;
+  width: 27px; height: 27px; border: 0; border-radius: 50%;
+  background: #eef0fb; color: #4f46e5;
+  display: grid; place-items: center; cursor: pointer;
+}
+.fd-audio:hover { background: #dfe2f6; }
+.fd-audio svg { width: 14px; height: 14px; }
+.fd-body { padding: 2px 12px 10px; max-height: 320px; overflow: auto; }
+.fd-pos { margin-top: 8px; }
+.fd-pos-name {
+  display: inline-block;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  color: #6d28d9; background: #f1ecfe; border-radius: 999px; padding: 2px 8px;
+}
+.fd-defs { padding-left: 18px; }
+.fd-def { margin-top: 6px; }
+.fd-def-text { overflow-wrap: anywhere; }
+.fd-example { color: #6b7280; font-style: italic; font-size: 12.5px; margin-top: 2px; overflow-wrap: anywhere; }
+.fd-foot { border-top: 1px solid #eceef4; padding: 6px 12px; display: flex; gap: 10px; }
+.fd-src { font-size: 11.5px; color: #6b7280; text-decoration: none; }
+.fd-src:hover { text-decoration: underline; }
+.fd-msg { padding: 16px 14px; text-align: center; }
+.fd-msg-title { font-weight: 600; margin-bottom: 4px; }
+.fd-muted { color: #6b7280; font-size: 13px; }
+.fd-alt { margin-top: 8px; }
+.fd-spinner {
+  width: 16px; height: 16px; margin: 0 auto 8px;
+  border: 2px solid #d7dbf0; border-top-color: #4f46e5; border-radius: 50%;
+  animation: fd-spin 0.7s linear infinite;
+}
+@keyframes fd-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-color-scheme: dark) {
+  body { background: #14161f; color: #e7e9f0; }
+  .fd-input-row { background: #1c1f2a; border-color: #2d3243; }
+  .fd-input-row:focus-within { border-color: #818cf8; }
+  .fd-search-icon { color: #9aa1b5; }
+  #fd-go { background: #6366f1; }
+  #fd-go:hover { background: #818cf8; }
+  .fd-card { background: #1c1f2a; color: #e7e9f0; border-color: #2d3243; }
+  .fd-phonetic, .fd-example, .fd-muted { color: #9aa1b5; }
+  .fd-audio { background: #2b2f45; color: #a5b4fc; }
+  .fd-audio:hover { background: #353a55; }
+  .fd-pos-name { color: #c4b5fd; background: #2a2440; }
+  .fd-foot { border-top-color: #2d3243; }
+  .fd-src { color: #9aa1b5; }
+  .fd-spinner { border-color: #3a4060; border-top-color: #a5b4fc; }
+}
