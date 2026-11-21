@@ -6,6 +6,10 @@
  */
 "use strict";
 
+// Chrome runs this as a service worker: load the shared helpers and map the
+// `browser` namespace onto `chrome` (MV3 chrome.* APIs return promises).
+if (typeof importScripts === "function" && typeof FD === "undefined") importScripts("shared.js");
+
 const API_BASE = "https://api.dictionaryapi.dev/api/v2/entries/en/";
 const CACHE_KEY = "fd_lookup_cache";
 const CACHE_MAX_ENTRIES = 150;
@@ -98,41 +102,73 @@ async function lookup(rawWord) {
   return Object.assign({ ok: true, word }, data);
 }
 
-browser.runtime.onMessage.addListener(function (message) {
-  if (message && message.type === "fd-lookup" && typeof message.word === "string") {
-    return lookup(message.word);
-  }
-  return undefined;
-});
-
-loadPersistedCache();
+// Lookups must wait for the persisted cache, otherwise a freshly started
+// background (Chrome's service worker restarts often) would overwrite the
+// stored cache with a near-empty one.
+const cacheReady = loadPersistedCache();
 
 /*
- * Right-click "Look up" menu. Content scripts can't run inside Firefox's
+ * Right-click "Look up" menu. Content scripts can't run inside the browser's
  * built-in PDF viewer (or other privileged pages), so selection popups never
  * appear there. The context menu still receives the selected text, so we
  * hand the word to the toolbar popup and open it.
+ * Not available on Firefox for Android (no context menus API there).
  */
+const MENU_ID = "fd-lookup-selection";
+const menus = browser.menus || browser.contextMenus;
+const action = browser.action || browser.browserAction;
 let pendingWord = null;
 
-browser.menus.create({
-  id: "fd-lookup-selection",
-  title: "Look up “%s”",
-  contexts: ["selection"],
-});
+function openLookupWindow(word) {
+  // Fallback when the toolbar popup can't be opened programmatically.
+  const url = browser.runtime.getURL("popup/popup.html") + "?word=" + encodeURIComponent(word);
+  if (browser.windows && browser.windows.create) {
+    return browser.windows.create({ url, type: "popup", width: 400, height: 560 });
+  }
+  return browser.tabs.create({ url });
+}
 
-browser.menus.onClicked.addListener(function (info) {
-  if (info.menuItemId !== "fd-lookup-selection") return;
-  pendingWord = String(info.selectionText || "").trim();
-  // Must be called synchronously inside the user-action handler.
-  browser.browserAction.openPopup().catch(function () {});
-});
+if (menus) {
+  // removeAll first: re-running create() on every background start (Chrome
+  // service worker) would otherwise fail with a duplicate-id error.
+  Promise.resolve(menus.removeAll()).then(function () {
+    menus.create({ id: MENU_ID, title: "Look up “%s”", contexts: ["selection"] });
+  }).catch(function () {});
 
-browser.runtime.onMessage.addListener(function (message) {
-  if (message && message.type === "fd-take-pending") {
+  menus.onClicked.addListener(function (info) {
+    if (info.menuItemId !== MENU_ID) return;
+    const word = String(info.selectionText || "").trim();
+    if (!word) return;
+    pendingWord = word;
+    let opened;
+    try {
+      // Must be called synchronously inside the user-action handler.
+      opened = action && action.openPopup ? action.openPopup() : Promise.reject(new Error("no openPopup"));
+    } catch (e) {
+      opened = Promise.reject(e);
+    }
+    Promise.resolve(opened).catch(function () {
+      pendingWord = null;
+      openLookupWindow(word).catch(function () {});
+    });
+  });
+}
+
+// sendResponse style (not returned promises) so the same code works in
+// Firefox and Chrome.
+browser.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  if (!message) return false;
+  if (message.type === "fd-lookup" && typeof message.word === "string") {
+    cacheReady
+      .then(function () { return lookup(message.word); })
+      .then(sendResponse, function () { sendResponse({ ok: false, error: "network" }); });
+    return true; // keep the channel open for the async response
+  }
+  if (message.type === "fd-take-pending") {
     const word = pendingWord;
     pendingWord = null;
-    return Promise.resolve(word);
+    sendResponse(word);
+    return false;
   }
-  return undefined;
+  return false;
 });
