@@ -106,3 +106,33 @@ browser.runtime.onMessage.addListener(function (message) {
 });
 
 loadPersistedCache();
+
+/*
+ * Right-click "Look up" menu. Content scripts can't run inside Firefox's
+ * built-in PDF viewer (or other privileged pages), so selection popups never
+ * appear there. The context menu still receives the selected text, so we
+ * hand the word to the toolbar popup and open it.
+ */
+let pendingWord = null;
+
+browser.menus.create({
+  id: "fd-lookup-selection",
+  title: "Look up “%s”",
+  contexts: ["selection"],
+});
+
+browser.menus.onClicked.addListener(function (info) {
+  if (info.menuItemId !== "fd-lookup-selection") return;
+  pendingWord = String(info.selectionText || "").trim();
+  // Must be called synchronously inside the user-action handler.
+  browser.browserAction.openPopup().catch(function () {});
+});
+
+browser.runtime.onMessage.addListener(function (message) {
+  if (message && message.type === "fd-take-pending") {
+    const word = pendingWord;
+    pendingWord = null;
+    return Promise.resolve(word);
+  }
+  return undefined;
+});
