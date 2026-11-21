@@ -1,4 +1,4 @@
-# Free Dictionary Lookup (Firefox Extension)
+# Free Dictionary Lookup (Firefox & Chrome Extension)
 
 Select any English word on any webpage and instantly see its meaning,
 pronunciation, examples, and more — in a clean popup right next to your
@@ -36,7 +36,9 @@ on your own machine.
 ## Project structure
 
 ```
-manifest.json        MV2 manifest (permissions, content script, background)
+manifest.json        Firefox MV2 manifest (desktop + Android)
+platform/chrome/     Chrome MV3 manifest (same source files)
+scripts/build.sh     Builds dist/*.zip for both stores
 shared.js            Word normalization + DOM renderer (used by all contexts)
 background.js        Fetches definitions, manages the cache
 content.js           Selection detection + shadow-DOM popup on pages
@@ -65,21 +67,20 @@ npx web-ext lint --source-dir .
 # Run in a clean Firefox profile with the extension loaded
 npx web-ext run --source-dir .
 
-# Build the submission zip into dist/
-npx web-ext build --source-dir . --artifacts-dir dist \
-  --ignore-files "dist/*" README.md --overwrite-dest
+# Build both store zips into dist/ (Firefox MV2 + Chrome MV3)
+./scripts/build.sh
 ```
 
 ## Publishing to addons.mozilla.org (AMO)
 
-The submission-ready package is `dist/free_dictionary_lookup-1.0.2.zip`.
+The submission-ready package is `dist/free_dictionary_lookup-1.0.3.zip`.
 
 ### Option A — List publicly on AMO (recommended)
 
 1. Create a (free) developer account at
    <https://addons.mozilla.org/developers/>.
 2. Go to **Submit a New Add-on** → *On this site*.
-3. Upload `dist/free_dictionary_lookup-1.0.2.zip`.
+3. Upload `dist/free_dictionary_lookup-1.0.3.zip`.
 4. Fill in the listing (name, summary, and the icon `icons/512.png`).
    Suggested privacy disclosure for the questionnaire: *"The extension sends
    the word the user selects (or types) to dictionaryapi.dev to fetch its
@@ -121,3 +122,14 @@ For a signed `.xpi` you can host yourself or share by link:
 ## License
 
 MIT
+
+## Chrome
+
+The same source runs in Chrome via `platform/chrome/manifest.json` (MV3,
+service-worker background). Keep its `version` in sync with `manifest.json`;
+`scripts/build.sh` refuses to build if they differ.
+
+- Try locally: `chrome://extensions` → enable **Developer mode** →
+  **Load unpacked** → pick `dist/chrome/`.
+- Publish: upload `dist/free_dictionary_lookup-chrome-<version>.zip` in the
+  [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole).

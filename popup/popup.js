@@ -49,11 +49,20 @@
 
   input.focus();
 
-  // Opened from the right-click "Look up" menu: prefill and look up.
-  browser.runtime.sendMessage({ type: "fd-take-pending" }).then(function (word) {
-    if (typeof word === "string" && word) {
-      input.value = word.slice(0, Number(input.maxLength) > 0 ? input.maxLength : 48);
-      runLookup();
-    }
-  }).catch(function () {});
+  function prefill(word) {
+    if (typeof word !== "string" || !word) return;
+    input.value = word.slice(0, Number(input.maxLength) > 0 ? input.maxLength : 48);
+    runLookup();
+  }
+
+  // Opened from the right-click "Look up" menu: prefill and look up. The word
+  // arrives either as ?word= (fallback window) or from the background script.
+  const fromUrl = new URLSearchParams(location.search).get("word");
+  if (fromUrl) {
+    prefill(fromUrl);
+  } else {
+    Promise.resolve(browser.runtime.sendMessage({ type: "fd-take-pending" }))
+      .then(prefill)
+      .catch(function () {});
+  }
 })();

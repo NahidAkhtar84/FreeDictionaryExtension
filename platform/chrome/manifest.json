@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Free Dictionary Lookup",
+  "version": "1.0.3",
+  "description": "Select any English word on a webpage to instantly see its meaning, pronunciation and examples in a clean popup. Powered by the Free Dictionary API.",
+  "author": "Nahid",
+  "homepage_url": "https://github.com/NahidAkhtar84/FreeDictionaryExtension",
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "96": "icons/96.png",
+    "128": "icons/128.png"
+  },
+  "permissions": ["storage", "contextMenus"],
+  "host_permissions": ["https://api.dictionaryapi.dev/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["shared.js", "content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_title": "Free Dictionary Lookup",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png",
+      "48": "icons/48.png"
+    }
+  },
+  "minimum_chrome_version": "127"
+}

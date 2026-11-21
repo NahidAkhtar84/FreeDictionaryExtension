@@ -7,6 +7,12 @@
 "use strict";
 
 (function (global) {
+  // Chrome only exposes `chrome.*` (promise-based in MV3); alias it so all
+  // scripts can use the `browser.*` namespace in both browsers.
+  if (typeof global.browser === "undefined" && typeof global.chrome !== "undefined") {
+    global.browser = global.chrome;
+  }
+
   const MAX_WORDS = 5;
   const MAX_CHARS = 48;
 

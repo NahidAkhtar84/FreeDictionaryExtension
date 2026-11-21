@@ -13,6 +13,7 @@
   const POPUP_WIDTH = 360;
   const MOUSE_DEBOUNCE_MS = 120;
   const KEY_DEBOUNCE_MS = 350;
+  const TOUCH_DEBOUNCE_MS = 450;
 
   let host = null;      // page-level element hosting the shadow root
   let shadow = null;    // closed shadow root
@@ -205,6 +206,27 @@
     },
     true
   );
+
+  // Touch devices (Firefox for Android): long-press selection and dragging the
+  // selection handles don't reliably fire mouseup, so follow selectionchange
+  // while the last pointer interaction was a touch.
+  let touchMode = false;
+  document.addEventListener(
+    "pointerdown",
+    function (event) {
+      if (isInsidePopup(event)) return;
+      touchMode = event.pointerType === "touch" || event.pointerType === "pen";
+    },
+    true
+  );
+  document.addEventListener("selectionchange", function () {
+    if (!touchMode) return;
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) return;
+    const node = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+    if (node && node.closest && node.closest("input, textarea, [contenteditable]")) return;
+    schedule(handleSelection, TOUCH_DEBOUNCE_MS);
+  });
 
   document.addEventListener(
     "keyup",
