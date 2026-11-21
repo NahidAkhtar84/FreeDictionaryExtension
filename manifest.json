@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Free Dictionary Lookup",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Select any English word on a webpage to instantly see its meaning, pronunciation and examples in a clean popup. Powered by the Free Dictionary API.",
   "author": "Nahid",
   "homepage_url": "https://github.com/NahidAkhtar84/FreeDictionaryExtension",

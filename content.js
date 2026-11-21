@@ -19,6 +19,7 @@
   let shadow = null;    // closed shadow root
   let content = null;   // container inside the shadow the renderer fills
   let currentWord = null;
+  let shownAt = 0;
   let debounceTimer = 0;
 
   const POPUP_CSS = `
@@ -85,6 +86,16 @@
     }
   `;
 
+  // True for text inputs and truly editable regions. A plain
+  // [contenteditable] selector would also match contenteditable="false",
+  // which many sites set on ordinary article text.
+  function isEditable(node) {
+    const el = node && (node.nodeType === 1 ? node : node.parentElement);
+    if (!el) return false;
+    if (el.closest && el.closest("input, textarea")) return true;
+    return !!el.isContentEditable;
+  }
+
   function isInsidePopup(event) {
     return !!host && event.composedPath().indexOf(host) !== -1;
   }
@@ -135,6 +146,7 @@
   }
 
   function show(state, rect) {
+    if (!host) shownAt = Date.now();
     ensurePopup();
     FD.renderInto(document, content, state);
     positionHost(rect);
@@ -194,18 +206,20 @@
     debounceTimer = setTimeout(fn, ms);
   }
 
-  document.addEventListener(
-    "mouseup",
-    function (event) {
-      if (isInsidePopup(event)) return;
-      // Selections inside editable fields report inconsistently via
-      // window.getSelection(); skip them rather than show misplaced popups.
-      const target = event.target;
-      if (target && target.closest && target.closest("input, textarea, [contenteditable]")) return;
-      schedule(handleSelection, MOUSE_DEBOUNCE_MS);
-    },
-    true
-  );
+  let lastPointerAt = 0;
+
+  // Registered on window (capture) so it still fires if a page stops
+  // propagation at the document level.
+  function onPointerEnd(event) {
+    lastPointerAt = Date.now();
+    if (isInsidePopup(event)) return;
+    // Selections inside editable fields report inconsistently via
+    // window.getSelection(); skip them rather than show misplaced popups.
+    if (isEditable(event.target)) return;
+    schedule(handleSelection, MOUSE_DEBOUNCE_MS);
+  }
+  window.addEventListener("mouseup", onPointerEnd, true);
+  window.addEventListener("dblclick", onPointerEnd, true);
 
   // Touch devices (Firefox for Android): long-press selection and dragging the
   // selection handles don't reliably fire mouseup, so follow selectionchange
@@ -215,17 +229,20 @@
     "pointerdown",
     function (event) {
       if (isInsidePopup(event)) return;
+      lastPointerAt = Date.now();
       touchMode = event.pointerType === "touch" || event.pointerType === "pen";
     },
     true
   );
   document.addEventListener("selectionchange", function () {
-    if (!touchMode) return;
+    // Touch: mouseup is unreliable. Mouse: safety net for pages that swallow
+    // mouseup — only within a moment of a real pointer interaction, so scripts
+    // that change the selection programmatically don't trigger lookups.
+    if (!touchMode && Date.now() - lastPointerAt > 700) return;
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed) return;
-    const node = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
-    if (node && node.closest && node.closest("input, textarea, [contenteditable]")) return;
-    schedule(handleSelection, TOUCH_DEBOUNCE_MS);
+    if (isEditable(sel.anchorNode)) return;
+    schedule(handleSelection, touchMode ? TOUCH_DEBOUNCE_MS : MOUSE_DEBOUNCE_MS + 150);
   });
 
   document.addEventListener(
@@ -263,10 +280,21 @@
     true
   );
 
-  // Any scroll (page or nested) detaches the popup from its selection — close.
+  // Scrolling moves the selection under the popup: keep the popup attached to
+  // it, and close only if the selection is gone or off screen. Scroll events
+  // right after showing (layout shifts, lazy content on busy sites) are ignored.
   window.addEventListener(
     "scroll",
-    function () { if (host) closePopup(); },
+    function () {
+      if (!host) return;
+      if (Date.now() - shownAt < 500) return;
+      const rect = selectionRect();
+      if (!rect || rect.bottom < 0 || rect.top > window.innerHeight) {
+        closePopup();
+        return;
+      }
+      positionHost(rect);
+    },
     { capture: true, passive: true }
   );
 })();
