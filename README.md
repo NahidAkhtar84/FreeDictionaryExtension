@@ -7,6 +7,11 @@ selection. A toolbar popup lets you type a word directly, too.
 Powered by the free, no-API-key
 [Free Dictionary API](https://dictionaryapi.dev).
 
+**Get it:** [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/free-dictionary-lookup/)
+· Chrome: [install manually](#chrome)
+
+![Demo: select a word on a web page, or right-click it in a PDF and choose Look up](assets/demo/free-dictionary-lookup-demo.gif)
+
 ## Features
 
 - **Select to lookup** — double-click or select a word (mouse or Shift+arrows);
