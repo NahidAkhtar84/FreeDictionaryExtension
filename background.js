@@ -6,7 +6,7 @@
  */
 "use strict";
 
-const API_BASE = "https://dictionaryapi.dev/api/v2/entries/en/";
+const API_BASE = "https://api.dictionaryapi.dev/api/v2/entries/en/";
 const CACHE_KEY = "fd_lookup_cache";
 const CACHE_MAX_ENTRIES = 150;
 const MAX_ENTRY_BYTES = 60000; // skip persisting absurdly large entries

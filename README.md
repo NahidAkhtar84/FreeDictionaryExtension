@@ -69,14 +69,14 @@ npx web-ext build --source-dir . --artifacts-dir dist \
 
 ## Publishing to addons.mozilla.org (AMO)
 
-The submission-ready package is `dist/free_dictionary_lookup-1.0.0.zip`.
+The submission-ready package is `dist/free_dictionary_lookup-1.0.1.zip`.
 
 ### Option A — List publicly on AMO (recommended)
 
 1. Create a (free) developer account at
    <https://addons.mozilla.org/developers/>.
 2. Go to **Submit a New Add-on** → *On this site*.
-3. Upload `dist/free_dictionary_lookup-1.0.0.zip`.
+3. Upload `dist/free_dictionary_lookup-1.0.1.zip`.
 4. Fill in the listing (name, summary, and the icon `icons/512.png`).
    Suggested privacy disclosure for the questionnaire: *"The extension sends
    the word the user selects (or types) to dictionaryapi.dev to fetch its

@@ -15,7 +15,17 @@
    * something we can look up (empty, too long, no letters, digits, code...).
    */
   function normalizeWord(raw) {
-    let t = String(raw == null ? "" : raw).replace(/\s+/g, " ").trim();
+    let t = String(raw == null ? "" : raw);
+    // Pasted/PDF text often carries ligatures (ﬁ, ﬂ), invisible characters
+    // (zero-width spaces, soft hyphens, BOM) and typographic apostrophes or
+    // hyphens. Fold them into plain ASCII before validating.
+    if (t.normalize) t = t.normalize("NFKC");
+    t = t
+      .replace(/[\u00AD\u200B-\u200D\u2060\uFEFF]/g, "")
+      .replace(/[\u2018\u2019\u02BC\u2032]/g, "'")
+      .replace(/[\u2010\u2011]/g, "-")
+      .replace(/\s+/g, " ")
+      .trim();
     // Strip surrounding punctuation and quotes, keep inner apostrophes/hyphens.
     t = t.replace(/^[\s'`"“”‘’(\[{\-–—.,;:!?]+/, "").replace(/[\s'`"“”‘’)\]}.,;:!?–—-]+$/, "");
     if (!t) return null;
