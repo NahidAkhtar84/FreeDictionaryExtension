@@ -48,4 +48,12 @@
   });
 
   input.focus();
+
+  // Opened from the right-click "Look up" menu: prefill and look up.
+  browser.runtime.sendMessage({ type: "fd-take-pending" }).then(function (word) {
+    if (typeof word === "string" && word) {
+      input.value = word.slice(0, Number(input.maxLength) > 0 ? input.maxLength : 48);
+      runLookup();
+    }
+  }).catch(function () {});
 })();
