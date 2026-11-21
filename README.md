@@ -129,6 +129,13 @@ The same source runs in Chrome via `platform/chrome/manifest.json` (MV3,
 service-worker background). Keep its `version` in sync with `manifest.json`;
 `scripts/build.sh` refuses to build if they differ.
 
+- Install without the Web Store (free): download
+  `free_dictionary_lookup-chrome-<version>.zip` from the
+  [GitHub releases](https://github.com/NahidAkhtar84/FreeDictionaryExtension/releases)
+  (or run `./scripts/build.sh` after cloning), unzip it, open
+  `chrome://extensions`, enable **Developer mode**, click **Load unpacked**
+  and pick the unzipped folder. Chrome may show a developer-mode warning;
+  keep the folder in place, since Chrome loads the extension from it.
 - Try locally: `chrome://extensions` → enable **Developer mode** →
   **Load unpacked** → pick `dist/chrome/`.
 - Publish: upload `dist/free_dictionary_lookup-chrome-<version>.zip` in the
